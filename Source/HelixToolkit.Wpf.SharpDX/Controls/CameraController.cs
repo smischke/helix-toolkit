@@ -10,18 +10,132 @@
 namespace HelixToolkit.Wpf.SharpDX
 {
     using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Diagnostics;
     using System.Linq;
     using System.Windows;
+    using System.Windows.Data;
     using System.Windows.Input;
+    using System.Windows.Media.Media3D;
+    using Controls;
     using Utilities;
     using Vector3 = global::SharpDX.Vector3;
     using Vector2 = global::SharpDX.Vector2;
+    using SharpDX;
+
+    /// <summary>
+    /// Defines a small interface of a camera controller to allow a custom implementation.
+    /// </summary>
+    public interface ICameraController
+    {
+        /// <summary>
+        /// Attach this <see cref="ICameraController"/> to a <see cref="Viewport3DX"/>.
+        /// </summary>
+        /// <param name="viewport">
+        /// The respective <see cref="Viewport3DX"/>.
+        /// </param>
+        void Attach(Viewport3DX viewport);
+
+        /// <summary>
+        /// Detaches this <see cref="ICameraController"/> from a <see cref="Viewport3DX"/>, if attached.
+        /// </summary>
+        void Detach();
+
+        /// <summary>
+        /// Adds the specified move force.
+        /// </summary>
+        /// <param name="delta">
+        /// The delta.
+        /// </param>
+        void AddMoveForce(Vector3 delta);
+
+        /// <summary>
+        /// Adds the specified pan force.
+        /// </summary>
+        /// <param name="dx">
+        /// The delta x. 
+        /// </param>
+        /// <param name="dy">
+        /// The delta y. 
+        /// </param>
+        void AddPanForce(float dx, float dy);
+
+        /// <summary>
+        /// The add pan force.
+        /// </summary>
+        /// <param name="pan">
+        /// The pan. 
+        /// </param>
+        void AddPanForce(Vector3 pan);
+
+        /// <summary>
+        /// The add rotate force.
+        /// </summary>
+        /// <param name="dx">
+        /// The delta x. 
+        /// </param>
+        /// <param name="dy">
+        /// The delta y. 
+        /// </param>
+        void AddRotateForce(float dx, float dy);
+
+        /// <summary>
+        /// Adds the zoom force.
+        /// </summary>
+        /// <param name="dx">
+        /// The delta. 
+        /// </param>
+        void AddZoomForce(float dx);
+
+        /// <summary>
+        /// Adds the zoom force.
+        /// </summary>
+        /// <param name="dx">
+        /// The delta. 
+        /// </param>
+        /// <param name="zoomOrigin">
+        /// The zoom origin. 
+        /// </param>
+        void AddZoomForce(float dx, Vector3 zoomOrigin);
+
+        /// <summary>
+        /// Changes the direction of the camera.
+        /// </summary>
+        /// <param name="lookDir">
+        /// The look direction. 
+        /// </param>
+        /// <param name="upDir">
+        /// The up direction. 
+        /// </param>
+        /// <param name="animationTime">
+        /// The animation time. 
+        /// </param>
+        void ChangeDirection(Vector3D lookDir, Vector3D upDir, double animationTime);
+
+        /// <summary>
+        /// Starts spinning.
+        /// </summary>
+        /// <param name="speed">The speed.</param>
+        /// <param name="position">The position.</param>
+        /// <param name="aroundPoint">The point to spin around.</param>
+        void StartSpin(Vector2 speed, Point position, Vector3 aroundPoint);
+
+        /// <summary>
+        ///   Stops the spinning.
+        /// </summary>
+        void StopSpin();
+
+        /// <summary>
+        /// The rendering event handler.
+        /// </summary>
+        void OnCompositionTargetRendering(long ticks);
+    }
 
     /// <summary>
     /// Provides a control that manipulates the camera by mouse and keyboard gestures.
     /// </summary>
-    public class CameraController
+    public class CameraController : Subscriber<Viewport3DX>, ICameraController
     {
         /// <summary>
         /// The camera history stack.
@@ -40,6 +154,11 @@ namespace HelixToolkit.Wpf.SharpDX
         /// The change look at event handler.
         /// </summary>
         internal RotateHandler changeLookAtHandler;
+
+        /// <summary>
+        /// The actual camera.
+        /// </summary>
+        private Camera actualCamera;
 
         /// <summary>
         /// The is spinning flag.
@@ -136,27 +255,154 @@ namespace HelixToolkit.Wpf.SharpDX
         /// </summary>
         private double zoomSpeed;
 
+        private readonly List<CommandBinding> commandBindings;
+
         private static readonly Point PointZero = new Point(0, 0);
         private static readonly Vector2 VectorZero = new Vector2();
         private static readonly Vector3 Vector3DZero = new Vector3();
 
         /// <summary>
+        /// Gets the <see cref="Viewport3DX"/>.
+        /// </summary>
+        public Viewport3DX Viewport => (Viewport3DX)this.Target;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="CameraController" /> class.
         /// </summary>
-        public CameraController(Viewport3DX viewport)
+        public CameraController()
         {
-            InitializeBindings();
-            Viewport = viewport;
-            Viewport.SizeChanged += (s, e) =>
+            this.InitializeBindings();
+            this.commandBindings = new List<CommandBinding>
             {
-                Width = (int)e.NewSize.Width;
-                Height = (int)e.NewSize.Height;
+                new CommandBinding(ViewportCommands.SetTarget, this.setTargetHandler.Execute),
+                new CommandBinding(ViewportCommands.Zoom, this.zoomHandler.Execute),
+                new CommandBinding(ViewportCommands.Pan, this.panHandler.Execute),
+                new CommandBinding(ViewportCommands.Rotate, this.rotateHandler.Execute),
+                new CommandBinding(ViewportCommands.ChangeFieldOfView, this.changeFieldOfViewHandler.Execute),
+                new CommandBinding(ViewportCommands.ZoomRectangle, this.zoomRectangleHandler.Execute),
             };
-            Width = (int)viewport.Width;
-            Height = (int)viewport.Height;
         }
 
-        private Camera actualCamera;
+        protected override void OnAttach()
+        {
+            this.Width = (int)this.Viewport.Width;
+            this.Height = (int)this.Viewport.Height;
+            this.Viewport.CommandBindings.AddRange(this.commandBindings);
+            this.InitCameraController();
+
+            this.Subscribe(Viewport3DX.CameraProperty, (s, e) => this.ActualCamera = this.Viewport.Camera);
+            this.Subscribe(Viewport3DX.DefaultCameraProperty, (s, e) => this.DefaultCamera = this.Viewport.DefaultCamera);
+            this.Subscribe(Viewport3DX.CameraModeProperty, (s, e) => this.CameraMode = this.Viewport.CameraMode);
+            this.Subscribe(Viewport3DX.CameraRotationModeProperty, (s, e) => this.CameraRotationMode = this.Viewport.CameraRotationMode);
+            this.Subscribe(Viewport3DX.PageUpDownZoomSensitivityProperty, (s, e) => this.PageUpDownZoomSensitivity = this.Viewport.PageUpDownZoomSensitivity);
+            this.Subscribe(Viewport3DX.PanCursorProperty, (s, e) => this.PanCursor = this.Viewport.PanCursor);
+            this.Subscribe(Viewport3DX.RotateAroundMouseDownPointProperty, (s, e) => this.RotateAroundMouseDownPoint = this.Viewport.RotateAroundMouseDownPoint);
+            this.Subscribe(Viewport3DX.RotateCursorProperty, (s, e) => this.RotateCursor = this.Viewport.RotateCursor);
+            this.Subscribe(Viewport3DX.RotationSensitivityProperty, (s, e) => this.RotationSensitivity = this.Viewport.RotationSensitivity);
+            this.Subscribe(Viewport3DX.ShowCameraTargetProperty, (s, e) => this.ShowCameraTarget = this.Viewport.ShowCameraTarget);
+            this.Subscribe(Viewport3DX.SpinReleaseTimeProperty, (s, e) => this.SpinReleaseTime = this.Viewport.SpinReleaseTime);
+            this.Subscribe(Viewport3DX.UpDownPanSensitivityProperty, (s, e) => this.UpDownPanSensitivity = this.Viewport.UpDownPanSensitivity);
+            this.Subscribe(Viewport3DX.UpDownRotationSensitivityProperty, (s, e) => this.UpDownRotationSensitivity = this.Viewport.UpDownRotationSensitivity);
+            this.Subscribe(Viewport3DX.ZoomAroundMouseDownPointProperty, (s, e) => this.ZoomAroundMouseDownPoint = this.Viewport.ZoomAroundMouseDownPoint);
+            this.Subscribe(Viewport3DX.ZoomCursorProperty, (s, e) => this.ZoomCursor = this.Viewport.ZoomCursor);
+            this.Subscribe(Viewport3DX.ZoomRectangleCursorProperty, (s, e) => this.ZoomRectangleCursor = this.Viewport.ZoomRectangleCursor);
+            this.Subscribe(Viewport3DX.ZoomSensitivityProperty, (s, e) => this.ZoomSensitivity = this.Viewport.ZoomSensitivity);
+            this.Subscribe(Viewport3DX.ChangeFieldOfViewCursorProperty, (s, e) => this.ChangeFieldOfViewCursor = this.Viewport.ChangeFieldOfViewCursor);
+            this.Subscribe(Viewport3DX.CameraInertiaFactorProperty, (s, e) => this.InertiaFactor = this.Viewport.CameraInertiaFactor);
+            this.Subscribe(Viewport3DX.InfiniteSpinProperty, (s, e) => this.InfiniteSpin = this.Viewport.InfiniteSpin);
+            this.Subscribe(Viewport3DX.IsChangeFieldOfViewEnabledProperty, (s, e) => this.IsChangeFieldOfViewEnabled = this.Viewport.IsChangeFieldOfViewEnabled);
+            this.Subscribe(Viewport3DX.IsInertiaEnabledProperty, (s, e) => this.IsInertiaEnabled = this.Viewport.IsInertiaEnabled);
+            this.Subscribe(Viewport3DX.IsMoveEnabledProperty, (s, e) => this.IsMoveEnabled = this.Viewport.IsMoveEnabled);
+            this.Subscribe(Viewport3DX.IsPanEnabledProperty, (s, e) => this.IsPanEnabled = this.Viewport.IsPanEnabled);
+            this.Subscribe(Viewport3DX.IsRotationEnabledProperty, (s, e) => this.IsRotationEnabled = this.Viewport.IsRotationEnabled);
+            this.Subscribe(Viewport3DX.IsTouchRotateEnabledProperty, (s, e) => this.EnableTouchRotate = this.Viewport.IsTouchRotateEnabled);
+            this.Subscribe(Viewport3DX.IsPinchZoomEnabledProperty, (s, e) => this.EnablePinchZoom = this.Viewport.IsPinchZoomEnabled);
+            this.Subscribe(Viewport3DX.PinchZoomAtCenterProperty, (s, e) => this.PinchZoomAtCenter = this.Viewport.PinchZoomAtCenter);
+            this.Subscribe(Viewport3DX.IsThreeFingerPanningEnabledProperty, (s, e) => this.EnableThreeFingerPan = this.Viewport.IsThreeFingerPanningEnabled);
+            this.Subscribe(Viewport3DX.LeftRightPanSensitivityProperty, (s, e) => this.LeftRightPanSensitivity = this.Viewport.LeftRightPanSensitivity);
+            this.Subscribe(Viewport3DX.LeftRightRotationSensitivityProperty, (s, e) => this.LeftRightRotationSensitivity = this.Viewport.LeftRightRotationSensitivity);
+            this.Subscribe(Viewport3DX.MaximumFieldOfViewProperty, (s, e) => this.MaximumFieldOfView = this.Viewport.MaximumFieldOfView);
+            this.Subscribe(Viewport3DX.MinimumFieldOfViewProperty, (s, e) => this.MinimumFieldOfView = this.Viewport.MinimumFieldOfView);
+            this.Subscribe(Viewport3DX.ModelUpDirectionProperty, (s, e) => this.ModelUpDirection = this.Viewport.ModelUpDirection.ToVector3());
+            this.Subscribe(Viewport3DX.ZoomDistanceLimitFarProperty, (s, e) => this.ZoomDistanceLimitFar = this.Viewport.ZoomDistanceLimitFar);
+            this.Subscribe(Viewport3DX.ZoomDistanceLimitNearProperty, (s, e) => this.ZoomDistanceLimitNear = this.Viewport.ZoomDistanceLimitNear);
+            this.Subscribe(Viewport3DX.FixedRotationPointProperty, (s, e) => this.FixedRotationPoint = this.Viewport.FixedRotationPoint.ToVector3());
+            this.Subscribe(Viewport3DX.FixedRotationPointEnabledProperty, (s, e) => this.FixedRotationPointEnabled = this.Viewport.FixedRotationPointEnabled);
+
+            this.Viewport.SizeChanged += this.OnViewportSizeChanged;
+            this.Viewport.MouseDown += this.OnMouseDown;
+            this.Viewport.MouseWheel += this.OnMouseWheel;
+            this.Viewport.ManipulationStarted += this.OnManipulationStarted;
+            this.Viewport.ManipulationDelta += this.OnManipulationDelta;
+            this.Viewport.ManipulationCompleted += this.OnManipulationCompleted;
+            this.Viewport.KeyDown += this.OnKeyDown;
+        }
+
+        protected override void OnDetach()
+        {
+            this.Viewport.SizeChanged -= this.OnViewportSizeChanged;
+            this.Viewport.MouseDown -= this.OnMouseDown;
+            this.Viewport.MouseWheel -= this.OnMouseWheel;
+            this.Viewport.ManipulationStarted -= this.OnManipulationStarted;
+            this.Viewport.ManipulationDelta -= this.OnManipulationDelta;
+            this.Viewport.ManipulationCompleted -= this.OnManipulationCompleted;
+            this.Viewport.KeyDown -= this.OnKeyDown;
+
+            this.Width = 0;
+            this.Height = 0;
+            this.commandBindings.ForEach(cb => this.Viewport.CommandBindings.Remove(cb));
+        }
+
+        private void OnViewportSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            this.Width = (int)e.NewSize.Width;
+            this.Height = (int)e.NewSize.Height;
+        }
+
+        private void InitCameraController()
+        {
+            #region Assign Defaults
+            this.ActualCamera = this.Viewport.Camera;
+            this.DefaultCamera = this.Viewport.DefaultCamera;
+            this.CameraMode = this.Viewport.CameraMode;
+            this.CameraRotationMode = this.Viewport.CameraRotationMode;
+            this.PageUpDownZoomSensitivity = this.Viewport.PageUpDownZoomSensitivity;
+            this.PanCursor = this.Viewport.PanCursor;
+            this.RotateAroundMouseDownPoint = this.Viewport.RotateAroundMouseDownPoint;
+            this.RotateCursor = this.Viewport.RotateCursor;
+            this.RotationSensitivity = this.Viewport.RotationSensitivity;
+            this.ShowCameraTarget = this.Viewport.ShowCameraTarget;
+            this.SpinReleaseTime = this.Viewport.SpinReleaseTime;
+            this.UpDownPanSensitivity = this.Viewport.UpDownPanSensitivity;
+            this.UpDownRotationSensitivity = this.Viewport.UpDownRotationSensitivity;
+            this.ZoomAroundMouseDownPoint = this.Viewport.ZoomAroundMouseDownPoint;
+            this.ZoomCursor = this.Viewport.ZoomCursor;
+            this.ZoomRectangleCursor = this.Viewport.ZoomRectangleCursor;
+            this.ZoomSensitivity = this.Viewport.ZoomSensitivity;
+            this.ChangeFieldOfViewCursor = this.Viewport.ChangeFieldOfViewCursor;
+            this.InertiaFactor = this.Viewport.CameraInertiaFactor;
+            this.InfiniteSpin = this.Viewport.InfiniteSpin;
+            this.IsChangeFieldOfViewEnabled = this.Viewport.IsChangeFieldOfViewEnabled;
+            this.IsInertiaEnabled = this.Viewport.IsInertiaEnabled;
+            this.IsMoveEnabled = this.Viewport.IsMoveEnabled;
+            this.IsPanEnabled = this.Viewport.IsPanEnabled;
+            this.IsRotationEnabled = this.Viewport.IsRotationEnabled;
+            this.EnableTouchRotate = this.Viewport.IsTouchRotateEnabled;
+            this.EnablePinchZoom = this.Viewport.IsPinchZoomEnabled;
+            this.PinchZoomAtCenter = this.Viewport.PinchZoomAtCenter;
+            this.EnableThreeFingerPan = this.Viewport.IsThreeFingerPanningEnabled;
+            this.LeftRightPanSensitivity = this.Viewport.LeftRightPanSensitivity;
+            this.LeftRightRotationSensitivity = this.Viewport.LeftRightRotationSensitivity;
+            this.MaximumFieldOfView = this.Viewport.MaximumFieldOfView;
+            this.MinimumFieldOfView = this.Viewport.MinimumFieldOfView;
+            this.ModelUpDirection = this.Viewport.ModelUpDirection.ToVector3();
+            this.ZoomDistanceLimitFar = this.Viewport.ZoomDistanceLimitFar;
+            this.ZoomDistanceLimitNear = this.Viewport.ZoomDistanceLimitNear;
+            this.FixedRotationPoint = this.Viewport.FixedRotationPoint.ToVector3();
+            this.FixedRotationPointEnabled = this.Viewport.FixedRotationPointEnabled;
+            #endregion
+        }
+
         /// <summary>
         /// Gets ActualCamera.
         /// </summary>
@@ -405,14 +651,6 @@ namespace HelixToolkit.Wpf.SharpDX
         /// Use -1 to invert the rotation direction.
         /// </remarks>
         public double UpDownRotationSensitivity = 1.0;
-
-        /// <summary>
-        /// Gets or sets Viewport.
-        /// </summary>
-        public Viewport3DX Viewport
-        {
-            private set; get;
-        }
 
         /// <summary>
         /// Gets or sets a value indicating whether to zoom around mouse down point.
@@ -887,7 +1125,7 @@ namespace HelixToolkit.Wpf.SharpDX
         /// <param name="e">
         /// The data for the event.
         /// </param>
-        public void OnManipulationCompleted(ManipulationCompletedEventArgs e)
+        public void OnManipulationCompleted(object sender, ManipulationCompletedEventArgs e)
         {
             var p = e.ManipulationOrigin + e.TotalManipulation.Translation;
 
@@ -909,7 +1147,7 @@ namespace HelixToolkit.Wpf.SharpDX
         /// <param name="e">
         /// The data for the event.
         /// </param>
-        public void OnManipulationDelta(ManipulationDeltaEventArgs e)
+        public void OnManipulationDelta(object sender, ManipulationDeltaEventArgs e)
         {
             if (!EnablePinchZoom && !EnableThreeFingerPan && !EnableTouchRotate)
             {
@@ -1028,7 +1266,7 @@ namespace HelixToolkit.Wpf.SharpDX
         /// <param name="e">
         /// The data for the event.
         /// </param>
-        public void OnManipulationStarted(ManipulationStartedEventArgs e)
+        public void OnManipulationStarted(object sender, ManipulationStartedEventArgs e)
         {
             this.touchPreviousPoint = e.ManipulationOrigin;
             this.manipulatorCount = 0;
@@ -1041,7 +1279,7 @@ namespace HelixToolkit.Wpf.SharpDX
         /// <param name="e">
         /// The <see cref="T:System.Windows.Input.MouseButtonEventArgs"/> that contains the event data. This event data reports details about the mouse button that was pressed and the handled state.
         /// </param>
-        public void OnMouseDown(MouseButtonEventArgs e)
+        public void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.XButton1)
             {
@@ -1221,7 +1459,7 @@ namespace HelixToolkit.Wpf.SharpDX
         /// <param name="e">
         /// The <see cref="System.Windows.Input.KeyEventArgs"/> instance containing the event data.
         /// </param>
-        public void OnKeyDown(KeyEventArgs e)
+        public void OnKeyDown(object sender, KeyEventArgs e)
         {
             var shift = Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
             var control = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
@@ -1317,9 +1555,6 @@ namespace HelixToolkit.Wpf.SharpDX
         /// <summary>
         /// Called when the mouse wheel is moved.
         /// </summary>
-        /// <param name="sender">
-        /// The sender.
-        /// </param>
         /// <param name="e">
         /// The <see cref="System.Windows.Input.MouseWheelEventArgs"/> instance containing the event data.
         /// </param>

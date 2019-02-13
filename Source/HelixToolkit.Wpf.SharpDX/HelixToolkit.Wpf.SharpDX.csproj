@@ -195,6 +195,7 @@
     <Compile Include="Model\Interfaces.cs" />
     <Compile Include="Model\Lights3D\ThreePointLight3D.cs" />
     <Compile Include="Properties\Resources.Designer.cs" />
+    <Compile Include="Utilities\Subscriber.cs" />
     <Compile Include="Utilities\Exporter.cs" />
     <Compile Include="Utilities\IExporter.cs" />
     <Compile Include="Utilities\ObjExporter.cs" />

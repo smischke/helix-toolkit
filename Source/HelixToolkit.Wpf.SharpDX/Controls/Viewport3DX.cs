@@ -86,11 +86,6 @@ namespace HelixToolkit.Wpf.SharpDX
         private readonly Camera perspectiveCamera;
 
         /// <summary>
-        /// The camera controller.
-        /// </summary>
-        private readonly CameraController cameraController;
-
-        /// <summary>
         /// The coordinate view.
         /// </summary>
         private ScreenSpacedElement3D coordinateView;
@@ -209,7 +204,7 @@ namespace HelixToolkit.Wpf.SharpDX
             }
         }
 
-        public CameraCore CameraCore { get { return CameraController.ActualCamera; } }
+        public CameraCore CameraCore { get { return this.Camera.CameraInternal; } }
 
         public IRenderHost RenderHost { get { return this.renderHostInternal; } }
 
@@ -240,7 +235,7 @@ namespace HelixToolkit.Wpf.SharpDX
         /// </summary>
         public Viewport3DX()
         {
-            this.cameraController = new CameraController(this);
+            this.CameraController = new CameraController();
             Items.CollectionChanged += Items_CollectionChanged;
             this.perspectiveCamera = new PerspectiveCamera();
             this.orthographicCamera = new OrthographicCamera();
@@ -249,18 +244,8 @@ namespace HelixToolkit.Wpf.SharpDX
 
             this.Camera = this.Orthographic ? this.orthographicCamera : this.perspectiveCamera;
          
-            InitCameraController();
             this.CommandBindings.Add(new CommandBinding(ViewportCommands.ZoomExtents, this.ZoomExtentsHandler));
-            this.CommandBindings.Add(new CommandBinding(ViewportCommands.SetTarget, this.cameraController.setTargetHandler.Execute));
             this.CommandBindings.Add(new CommandBinding(ViewportCommands.Reset, this.ResetHandler));
-
-            this.CommandBindings.Add(new CommandBinding(ViewportCommands.Zoom, this.cameraController.zoomHandler.Execute));
-            this.CommandBindings.Add(new CommandBinding(ViewportCommands.Pan, this.cameraController.panHandler.Execute));
-            this.CommandBindings.Add(new CommandBinding(ViewportCommands.Rotate, this.cameraController.rotateHandler.Execute));
-            this.CommandBindings.Add(
-                new CommandBinding(ViewportCommands.ChangeFieldOfView, this.cameraController.changeFieldOfViewHandler.Execute));
-            this.CommandBindings.Add(
-                new CommandBinding(ViewportCommands.ZoomRectangle, this.cameraController.zoomRectangleHandler.Execute));
             this.CommandBindings.Add(new CommandBinding(ViewportCommands.BottomView, this.BottomViewHandler));
             this.CommandBindings.Add(new CommandBinding(ViewportCommands.TopView, this.TopViewHandler));
             this.CommandBindings.Add(new CommandBinding(ViewportCommands.FrontView, this.FrontViewHandler));
@@ -278,51 +263,7 @@ namespace HelixToolkit.Wpf.SharpDX
                 {
                     renderHostInternal.IsRendering = (bool)e.NewValue;
                 }
-            };            
-        }
-
-        private void InitCameraController()
-        {
-            #region Assign Defaults
-            this.cameraController.ActualCamera = this.Camera;
-            this.cameraController.DefaultCamera = this.DefaultCamera;
-            this.cameraController.CameraMode = this.CameraMode;
-            this.cameraController.CameraRotationMode = this.CameraRotationMode;
-            this.cameraController.PageUpDownZoomSensitivity = this.PageUpDownZoomSensitivity;
-            this.cameraController.PanCursor = this.PanCursor;
-            this.cameraController.RotateAroundMouseDownPoint = this.RotateAroundMouseDownPoint;
-            this.cameraController.RotateCursor = this.RotateCursor;
-            this.cameraController.RotationSensitivity = this.RotationSensitivity;
-            this.cameraController.ShowCameraTarget = this.ShowCameraTarget;
-            this.cameraController.SpinReleaseTime = this.SpinReleaseTime;
-            this.cameraController.UpDownPanSensitivity = this.UpDownPanSensitivity;
-            this.cameraController.UpDownRotationSensitivity = this.UpDownRotationSensitivity;
-            this.cameraController.ZoomAroundMouseDownPoint = this.ZoomAroundMouseDownPoint;
-            this.cameraController.ZoomCursor = this.ZoomCursor;
-            this.cameraController.ZoomRectangleCursor = this.ZoomRectangleCursor;
-            this.cameraController.ZoomSensitivity = this.ZoomSensitivity;
-            this.cameraController.ChangeFieldOfViewCursor = this.ChangeFieldOfViewCursor;
-            this.cameraController.InertiaFactor = this.CameraInertiaFactor;
-            this.cameraController.InfiniteSpin = this.InfiniteSpin;
-            this.cameraController.IsChangeFieldOfViewEnabled = this.IsChangeFieldOfViewEnabled;
-            this.cameraController.IsInertiaEnabled = this.IsInertiaEnabled;
-            this.cameraController.IsMoveEnabled = this.IsMoveEnabled;
-            this.cameraController.IsPanEnabled = this.IsPanEnabled;
-            this.cameraController.IsRotationEnabled = this.IsRotationEnabled;
-            this.cameraController.EnableTouchRotate = this.IsTouchRotateEnabled;
-            this.cameraController.EnablePinchZoom = this.IsPinchZoomEnabled;
-            this.cameraController.PinchZoomAtCenter = this.PinchZoomAtCenter;
-            this.cameraController.EnableThreeFingerPan = this.IsThreeFingerPanningEnabled;
-            this.cameraController.LeftRightPanSensitivity = this.LeftRightPanSensitivity;
-            this.cameraController.LeftRightRotationSensitivity = this.LeftRightRotationSensitivity;
-            this.cameraController.MaximumFieldOfView = this.MaximumFieldOfView;
-            this.cameraController.MinimumFieldOfView = this.MinimumFieldOfView;
-            this.cameraController.ModelUpDirection = this.ModelUpDirection.ToVector3();
-            this.cameraController.ZoomDistanceLimitFar = this.ZoomDistanceLimitFar;
-            this.cameraController.ZoomDistanceLimitNear = this.ZoomDistanceLimitNear;
-            this.cameraController.FixedRotationPoint = this.FixedRotationPoint.ToVector3();
-            this.cameraController.FixedRotationPointEnabled = this.FixedRotationPointEnabled;
-            #endregion
+            };
         }
 
         private void Items_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -365,7 +306,7 @@ namespace HelixToolkit.Wpf.SharpDX
         /// </param>
         public void AddMoveForce(double dx, double dy, double dz)
         {
-            this.cameraController.AddMoveForce(new Vector3((float)dx, (float)dy, (float)dz));
+            this.CameraController.AddMoveForce(new Vector3((float)dx, (float)dy, (float)dz));
         }
 
         /// <summary>
@@ -376,7 +317,7 @@ namespace HelixToolkit.Wpf.SharpDX
         /// </param>
         public void AddMoveForce(Vector3D delta)
         {
-            this.cameraController.AddMoveForce(delta.ToVector3());
+            this.CameraController.AddMoveForce(delta.ToVector3());
         }
 
         /// <summary>
@@ -390,7 +331,7 @@ namespace HelixToolkit.Wpf.SharpDX
         /// </param>
         public void AddPanForce(double dx, double dy)
         {
-            this.cameraController.AddPanForce((float)dx, (float)dy);
+            this.CameraController.AddPanForce((float)dx, (float)dy);
         }
 
         /// <summary>
@@ -401,7 +342,7 @@ namespace HelixToolkit.Wpf.SharpDX
         /// </param>
         public void AddPanForce(Vector3D pan)
         {
-            this.cameraController.AddPanForce(pan.ToVector3());
+            this.CameraController.AddPanForce(pan.ToVector3());
         }
 
         /// <summary>
@@ -415,7 +356,7 @@ namespace HelixToolkit.Wpf.SharpDX
         /// </param>
         public void AddRotateForce(double dx, double dy)
         {
-            this.cameraController.AddRotateForce((float)dx, (float)dy);
+            this.CameraController.AddRotateForce((float)dx, (float)dy);
         }
 
         /// <summary>
@@ -426,7 +367,7 @@ namespace HelixToolkit.Wpf.SharpDX
         /// </param>
         public void AddZoomForce(double dx)
         {
-            this.cameraController.AddZoomForce((float)dx);
+            this.CameraController.AddZoomForce((float)dx);
         }
 
         /// <summary>
@@ -440,7 +381,7 @@ namespace HelixToolkit.Wpf.SharpDX
         /// </param>
         public void AddZoomForce(double dx, Point3D zoomOrigin)
         {
-            this.cameraController.AddZoomForce((float)dx, zoomOrigin.ToVector3());
+            this.CameraController.AddZoomForce((float)dx, zoomOrigin.ToVector3());
         }
 
         /// <summary>
@@ -457,7 +398,7 @@ namespace HelixToolkit.Wpf.SharpDX
         /// </param>
         public void ChangeDirection(Vector3D lookDir, Vector3D upDir, double animationTime = 500)
         {
-            this.cameraController.ChangeDirection(lookDir, upDir, animationTime);
+            this.CameraController.ChangeDirection(lookDir, upDir, animationTime);
         }
 
         /// <summary>
@@ -550,7 +491,7 @@ namespace HelixToolkit.Wpf.SharpDX
         /// </param>
         public void LookAt(Point3D p)
         {
-            this.cameraController.ActualCamera?.LookAt(p, 0);
+            this.Camera?.LookAt(p, 0);
         }
 
         /// <summary>
@@ -564,7 +505,7 @@ namespace HelixToolkit.Wpf.SharpDX
         /// </param>
         public void LookAt(Point3D p, double animationTime)
         {
-            this.cameraController.ActualCamera?.LookAt(p, animationTime);
+            this.Camera?.LookAt(p, animationTime);
         }
 
         /// <summary>
@@ -581,7 +522,7 @@ namespace HelixToolkit.Wpf.SharpDX
         /// </param>
         public void LookAt(Point3D p, double distance, double animationTime)
         {
-            this.cameraController.ActualCamera?.LookAt(p, distance, animationTime);
+            this.Camera?.LookAt(p, distance, animationTime);
         }
 
         /// <summary>
@@ -598,7 +539,7 @@ namespace HelixToolkit.Wpf.SharpDX
         /// </param>
         public void LookAt(Point3D p, Vector3D direction, double animationTime)
         {
-            this.cameraController.ActualCamera?.LookAt(p, direction, animationTime);
+            this.Camera?.LookAt(p, direction, animationTime);
         }
 
 
@@ -863,7 +804,7 @@ namespace HelixToolkit.Wpf.SharpDX
         /// <param name="aroundPoint">The point to spin around.</param>
         public void StartSpin(Vector speed, Point position, Point3D aroundPoint)
         {
-            cameraController.StartSpin(speed.ToVector2(), position, aroundPoint.ToVector3());
+            CameraController.StartSpin(speed.ToVector2(), position, aroundPoint.ToVector3());
         }
 
         /// <summary>
@@ -871,7 +812,7 @@ namespace HelixToolkit.Wpf.SharpDX
         /// </summary>
         public void StopSpin()
         {
-            cameraController.StopSpin();
+            CameraController.StopSpin();
         }
 
         /// <summary>
@@ -977,7 +918,7 @@ namespace HelixToolkit.Wpf.SharpDX
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
-            this.cameraController.OnMouseDown(e);
+            //this.CameraController.OnMouseDown(e);
             base.OnMouseDown(e);
         }
 
@@ -1078,13 +1019,13 @@ namespace HelixToolkit.Wpf.SharpDX
 
         protected override void OnMouseWheel(MouseWheelEventArgs e)
         {
-            cameraController.OnMouseWheel(this, e);
+            //CameraController.OnMouseWheel(this, e);
             base.OnMouseWheel(e);
         }
 
         private void Viewport3DX_FormMouseWheel(object sender, WinformHostExtend.FormMouseWheelEventArgs e)
         {
-            cameraController.OnMouseWheel(this, e);
+            //CameraController.OnMouseWheel(e);
             base.OnMouseWheel(e);
         }
         /// <inheritdoc/>
@@ -1105,26 +1046,26 @@ namespace HelixToolkit.Wpf.SharpDX
 
         protected override void OnManipulationStarted(ManipulationStartedEventArgs e)
         {
-            cameraController.OnManipulationStarted(e);
+            //CameraController.OnManipulationStarted(e);
             base.OnManipulationStarted(e);
         }
 
         protected override void OnManipulationDelta(ManipulationDeltaEventArgs e)
         {
-            cameraController.OnManipulationDelta(e);
+            //CameraController.OnManipulationDelta(e);
             base.OnManipulationDelta(e);
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
-            cameraController.OnKeyDown(e);
+            //CameraController.OnKeyDown(e);
             base.OnKeyDown(e);
         }
 
         /// <inheritdoc/>
         protected override void OnManipulationCompleted(ManipulationCompletedEventArgs e)
         {
-            cameraController.OnManipulationCompleted(e);
+            //CameraController.OnManipulationCompleted(e);
             base.OnManipulationCompleted(e);
             if (this.touchDownDevice != null)
             {
@@ -1250,15 +1191,14 @@ namespace HelixToolkit.Wpf.SharpDX
         {
             if (e.NewValue != e.OldValue)
             {
-                if (CameraController.ActualCamera != null)
+                if (e.OldValue is Camera oldCamera)
                 {
-                    CameraController.ActualCamera.CameraInternal.PropertyChanged -= CameraInternal_PropertyChanged;
+                    oldCamera.CameraInternal.PropertyChanged -= CameraInternal_PropertyChanged;
                 }
-                CameraController.ActualCamera = e.NewValue == null ?
-                    (Orthographic ? orthographicCamera : perspectiveCamera as Camera) : e.NewValue as Camera;
-                if (CameraController.ActualCamera != null)
+
+                if (e.NewValue is Camera newCamera)
                 {
-                    CameraController.ActualCamera.CameraInternal.PropertyChanged += CameraInternal_PropertyChanged;
+                    newCamera.CameraInternal.PropertyChanged += CameraInternal_PropertyChanged;
                 }
             }
         }
@@ -1426,7 +1366,7 @@ namespace HelixToolkit.Wpf.SharpDX
         public void Update(TimeSpan timeStamp)
         {
             OnCompositionTargetRendering();
-            cameraController.OnCompositionTargetRendering(timeStamp.Ticks);
+            CameraController.OnCompositionTargetRendering(timeStamp.Ticks);
         }
 
         /// <summary>
@@ -1588,11 +1528,12 @@ namespace HelixToolkit.Wpf.SharpDX
 
         private void ViewCubeClicked(Vector3D lookDirection, Vector3D upDirection)
         {
-            var target = cameraController.ActualCamera.Position + cameraController.ActualCamera.LookDirection;
-            double distance = cameraController.ActualCamera.LookDirection.Length;
+            var camera = this.Camera;
+            var target = camera.Position + camera.LookDirection;
+            double distance = camera.LookDirection.Length;
             lookDirection *= distance;
             var newPosition = target - lookDirection;
-            cameraController.ActualCamera.AnimateTo(newPosition, lookDirection, upDirection, 500);
+            camera.AnimateTo(newPosition, lookDirection, upDirection, 500);
         }
 
         /// <summary>
@@ -1804,6 +1745,19 @@ namespace HelixToolkit.Wpf.SharpDX
             }
 
             return null;
+        }
+
+        private void OnCameraControllerChanged(DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is ICameraController oldCameraController)
+            {
+                oldCameraController.Detach();
+            }
+
+            if (e.NewValue is ICameraController newCameraController)
+            {
+                newCameraController.Attach(this);
+            }
         }
     }
 }
