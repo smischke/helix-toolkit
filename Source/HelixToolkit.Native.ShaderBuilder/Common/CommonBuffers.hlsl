@@ -25,7 +25,7 @@ cbuffer cbTransforms : register(b0)
     float SSAOBias;
     float SSAOIntensity;
     float TimeStamp; // by seconds
-    float padding0;
+    bool IsPerspective;
     float OITPower;
     float OITSlope;
     int OITWeightMode;
@@ -132,7 +132,7 @@ cbuffer cbLights : register(b3)
     float padding;
 };
 
-#if defined(POINTLINE) // model for spline, line, point and billboard
+#if defined(POINTLINE) // model for line, point and billboard
 //Per model
 cbuffer cbPointLineModel : register(b4)
 {
@@ -140,14 +140,17 @@ cbuffer cbPointLineModel : register(b4)
     bool bHasInstances = false;
     bool bHasInstanceParams = false;
 	float2 padding1;
-    float4 pfParams = float4(0, 0, 0, 0); //Shared with spline, line, points and billboard
-    float4 pColor = float4(1, 1, 1, 1); //Shared with spline, line, points and billboard
+    float4 pfParams = float4(0, 0, 0, 0); //Shared with line, points and billboard
+    float4 pColor = float4(1, 1, 1, 1); //Shared with line, points and billboard
     bool fixedSize;
 	bool3 pbParams;
     bool enableDistanceFading;
     float fadeNearDistance;
     float fadeFarDistance;
-    float padding2;
+    bool bHasTexture = false;
+    float pTextureScale = 1;
+    float pAlphaThreshold = 0;
+    float2 padding2;
 };
 #endif
 #if defined(MATRIXSPLINE) // model for matrix spline
@@ -158,14 +161,17 @@ cbuffer cbMatrixSplineModel : register(b4)
     bool bHasInstances = false;
     bool bHasInstanceParams = false;
 	float2 padding1;
-    float4 pfParams = float4(0, 0, 0, 0);
-    float4 pColor = float4(1, 1, 1, 1);
+    float4 pfParams = float4(0, 0, 0, 0); //Shared with line, points and billboard
+    float4 pColor = float4(1, 1, 1, 1); //Shared with line, points and billboard
     bool fixedSize;
 	bool3 pbParams;
     bool enableDistanceFading;
     float fadeNearDistance;
     float fadeFarDistance;
-    float padding2;
+    bool bHasTexture = false;
+    float pTextureScale = 1;
+    float pAlphaThreshold = 0;
+    float2 padding2;
     float4x4 mSpline;
 };
 #endif
@@ -327,6 +333,7 @@ TextureCube<float3> texCubeMap : register(t20); // Radiance Map
 Texture2D<float> texShadowMap : register(t30);
 
 Texture2D texSSAOMap : register(t31);
+
 #if defined(SSAO)
 Texture2D<float3> texSSAONoise : register(t32);
 Texture2D<float> texSSAODepth : register(t33);

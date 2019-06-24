@@ -1,7 +1,7 @@
 #ifndef GSLINE_HLSL
 #define GSLINE_HLSL
 #define MATRIXSPLINE
-#define MVC 64
+#define MVC 56
 #include"..\Common\DataStructs.hlsl"
 #include"..\Common\Common.hlsl"
 

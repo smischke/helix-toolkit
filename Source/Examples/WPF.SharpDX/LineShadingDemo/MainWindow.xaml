@@ -84,14 +84,12 @@
                 Transform="{Binding Model3Transform}"
                 Color="White" />
 
-            <hx:LineGeometryModel3D
+            <hx:LineMaterialGeometryModel3D
                 x:Name="grid"
                 Geometry="{Binding Grid}"
                 IsRendering="{Binding GridEnabled}"
-                Smoothness="{Binding LineSmoothness}"
-                Thickness="{Binding LineThickness}"
-                Transform="{Binding GridTransform}"
-                Color="{Binding GridColor}" />
+                Material="{Binding GridMaterial}"
+                Transform="{Binding GridTransform}" />
             <hx:LineMaterialGeometryModel3D
                 Geometry="{Binding Lines}"
                 Material="{Binding LineMaterial}"
