@@ -127,6 +127,14 @@ namespace HelixToolkit.UWP
             /// <summary>
             /// 
             /// </summary>
+            public static string PSSpline
+            {
+                get;
+            } = "psSpline";
+
+            /// <summary>
+            /// 
+            /// </summary>
             public static string PSBillboardText
             {
                 get;
@@ -528,6 +536,11 @@ namespace HelixToolkit.UWP
             /// </summary>
             public static readonly ShaderDescription PSLineColor = new ShaderDescription(nameof(PSLineColor), ShaderStage.Pixel, new ShaderReflector(),
                 DefaultPSShaderByteCodes.PSLineColor);
+            /// <summary>
+            /// 
+            /// </summary>
+            public static readonly ShaderDescription PSSpline = new ShaderDescription(nameof(PSSpline), ShaderStage.Pixel, new ShaderReflector(),
+                DefaultPSShaderByteCodes.PSSpline);
             /// <summary>
             /// 
             /// </summary>

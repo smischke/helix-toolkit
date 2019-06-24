@@ -31,10 +31,13 @@ namespace LineShadingDemo
         public MeshGeometry3D Model { get; private set; }
         public LineGeometry3D Lines { get; private set; }
         public LineGeometry3D Grid { get; private set; }
+        public LineGeometry3D SplineModel { get; private set; }
+        public LineGeometry3D BezierModel { get; private set; }
         public double LineThickness { get; set; }
         public double LineSmoothness { get; set; }
         public bool LinesEnabled { get; set; }
         public bool GridEnabled { get; set; }
+        public double SplineTension { get; set; }
                 
         public PhongMaterial Material1 { get; private set; }
         public PhongMaterial Material2 { get; private set; }
@@ -107,11 +110,79 @@ namespace LineShadingDemo
                 this.Lines.Colors.Add(rnd.NextColor());
             }
 
+            // splines model3d
+            this.SplineModel = new LineGeometry3D();
+            this.SplineModel.Positions = new Vector3Collection();
+            this.SplineModel.Colors = new Color4Collection();
+            this.SplineModel.Indices = new IntCollection();
+
+            this.SplineModel.Positions.Add(new Vector3(1, 0, 0));
+            this.SplineModel.Positions.Add(new Vector3(2, 1, 0));
+            this.SplineModel.Positions.Add(new Vector3(1, 2, 0));
+            this.SplineModel.Positions.Add(new Vector3(0, 1, 0));
+
+            this.SplineModel.Colors.Add(Colors.Red.ToColor4());
+            this.SplineModel.Colors.Add(Colors.Green.ToColor4());
+            this.SplineModel.Colors.Add(Colors.Blue.ToColor4());
+            this.SplineModel.Colors.Add(Colors.Magenta.ToColor4());
+
+            this.SplineModel.Indices.Add(0);
+            this.SplineModel.Indices.Add(1);
+            this.SplineModel.Indices.Add(2);
+            this.SplineModel.Indices.Add(3);
+
+            this.SplineModel.Indices.Add(1);
+            this.SplineModel.Indices.Add(2);
+            this.SplineModel.Indices.Add(3);
+            this.SplineModel.Indices.Add(0);
+
+            this.SplineModel.Indices.Add(2);
+            this.SplineModel.Indices.Add(3);
+            this.SplineModel.Indices.Add(0);
+            this.SplineModel.Indices.Add(1);
+
+            this.SplineModel.Indices.Add(3);
+            this.SplineModel.Indices.Add(0);
+            this.SplineModel.Indices.Add(1);
+            this.SplineModel.Indices.Add(2);
+
+            this.BezierModel = new LineGeometry3D();
+            this.BezierModel.Positions = new Vector3Collection();
+            this.BezierModel.Colors = new Color4Collection();
+            this.BezierModel.Indices = new IntCollection();
+
+            this.BezierModel.Positions.Add(new Vector3(-0.25f, 1, 0));
+            this.BezierModel.Positions.Add(new Vector3(-0.25f, 2, 0));
+            this.BezierModel.Positions.Add(new Vector3(-1.75f, 2, 0));
+            this.BezierModel.Positions.Add(new Vector3(-1.75f, 1, 0));
+
+            this.BezierModel.Positions.Add(new Vector3(-0.25f, 0, 0));
+            this.BezierModel.Positions.Add(new Vector3(-1.75f, 0, 0));
+
+            this.BezierModel.Colors.Add(Colors.Green.ToColor4());
+            this.BezierModel.Colors.Add(Colors.Green.ToColor4());
+            this.BezierModel.Colors.Add(Colors.Blue.ToColor4());
+            this.BezierModel.Colors.Add(Colors.Blue.ToColor4());
+
+            this.BezierModel.Colors.Add(Colors.Green.ToColor4());
+            this.BezierModel.Colors.Add(Colors.Blue.ToColor4());
+
+            this.BezierModel.Indices.Add(0);
+            this.BezierModel.Indices.Add(1);
+            this.BezierModel.Indices.Add(2);
+            this.BezierModel.Indices.Add(3);
+
+            this.BezierModel.Indices.Add(0);
+            this.BezierModel.Indices.Add(4);
+            this.BezierModel.Indices.Add(5);
+            this.BezierModel.Indices.Add(3);
+
             // lines params
             this.LineThickness = 2;
             this.LineSmoothness = 2.0;
             this.LinesEnabled = true;
             this.GridEnabled = true;
+            this.SplineTension = 0.5;
 
             // model trafos
             this.Model1Transform = new TranslateTransform3D(0, 0, 0);

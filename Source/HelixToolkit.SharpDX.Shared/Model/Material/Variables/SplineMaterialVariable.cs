@@ -15,9 +15,15 @@ namespace HelixToolkit.UWP
 {
     namespace Model
     {
+        using Shaders;
+
         public class SplineMaterialVariable : LineMaterialVariable
         {
             private readonly SplineMaterialCore material;
+
+            public static readonly ConstantBufferDescription MatrixSplineConstantBufferDesc
+                = new ConstantBufferDescription(DefaultBufferNames.MatrixSplineModelCB,
+                    MatrixSplineMaterialStruct.SizeInBytes);
 
             /// <summary>
             /// Initializes a new instance of the <see cref="LineMaterialVariable"/> class.
@@ -31,7 +37,8 @@ namespace HelixToolkit.UWP
             public SplineMaterialVariable(IEffectsManager manager, IRenderTechnique technique, SplineMaterialCore materialCore,
                 string linePassName = DefaultPassNames.Default, string shadowPassName = DefaultPassNames.ShadowPass,
                 string depthPassName = DefaultPassNames.DepthPrepass)
-                : base(manager, technique, materialCore, linePassName, shadowPassName, depthPassName)
+                : base(manager, technique, MatrixSplineConstantBufferDesc, materialCore, 
+                       linePassName, shadowPassName, depthPassName)
             {
                 this.material = materialCore;          
             }
@@ -39,11 +46,7 @@ namespace HelixToolkit.UWP
             protected override void OnInitialPropertyBindings()
             {
                 base.OnInitialPropertyBindings();
-                this.AddPropertyBinding(nameof(SplineMaterialCore.Tension), () =>
-                {
-                    this.WriteValue(PointLineMaterialStruct.ParamsStr, new Vector3(
-                        this.material.Thickness, this.material.Smoothness, this.material.Tension));
-                });
+                this.AddPropertyBinding(nameof(SplineMaterialCore.SplineMatrix), () => { this.WriteValue(MatrixSplineMaterialStruct.SplineMatrix, this.material.SplineMatrix); });
             }
         }
     }

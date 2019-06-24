@@ -24,6 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Element3D\BillboardTextModel3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Element3D\BoneGroupModel3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Element3D\BoneSkinmeshGeometryModel3D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Element3D\BezierSplineGeometryModel3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Element3D\ContinuousRender3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Element3D\CoordinateSystemModel3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Element3D\CrossSectionMeshGeometryModel3D.cs" />
@@ -50,6 +51,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Element3D\SceneNodeGroupModel3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Element3D\ScreenQuadModel3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Element3D\ScreenSpacedGroup3D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Element3D\CatmullRomSplineGeometryModel3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Element3D\TransformManipulator3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Element3D\VolumeTextureModel3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\CommonExtensions.cs" />

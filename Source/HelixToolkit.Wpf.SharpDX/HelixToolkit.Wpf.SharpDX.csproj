@@ -140,6 +140,7 @@
     <None Include="Resources\gsMeshSkinnedOut.cso" />
     <None Include="Resources\gsParticle.cso" />
     <None Include="Resources\gsPoint.cso" />
+    <None Include="Resources\gsSpline.cso" />
     <None Include="Resources\hsMeshTriTessellation.cso" />
     <None Include="Resources\psBillboardText.cso" />
     <None Include="Resources\psBillboardTextOIT.cso" />
@@ -183,6 +184,7 @@
     <None Include="Resources\psScreenDup.cso" />
     <None Include="Resources\psShadow.cso" />
     <None Include="Resources\psSkybox.cso" />
+    <None Include="Resources\psSpline.cso" />
     <None Include="Resources\psSprite.cso" />
     <None Include="Resources\psSSAO.cso" />
     <None Include="Resources\psSSAOBlur.cso" />
@@ -221,6 +223,7 @@
     <None Include="Resources\vsScreenDupCursor.cso" />
     <None Include="Resources\vsScreenQuad.cso" />
     <None Include="Resources\vsSkybox.cso" />
+    <None Include="Resources\vsSpline.cso" />
     <None Include="Resources\vsSprite.cso" />
     <None Include="Resources\vsSSAO.cso" />
     <None Include="Resources\vsVolume.cso" />

@@ -407,6 +407,16 @@ namespace HelixToolkit.UWP
     /// Used combine with <see cref="PointLineMaterialStruct"/>
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    public struct MatrixSplineMaterialStruct
+    {
+        public const int SizeInBytes = (4 * 4) * 4 + PointLineMaterialStruct.SizeInBytes;
+        public const string SplineMatrix = "mSpline";//float4x4
+    }
+
+    /// <summary>
+    /// Used combine with <see cref="PointLineMaterialStruct"/>
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct ParticleModelStruct
     {
         public Matrix World;

@@ -40,6 +40,10 @@ namespace HelixToolkit.UWP
         /// <summary>
         /// 
         /// </summary>
+        public const string Splines = "RenderSplines";
+        /// <summary>
+        /// 
+        /// </summary>
         public const string Points = "RenderPoints";
         /// <summary>
         /// 

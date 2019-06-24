@@ -126,6 +126,13 @@ namespace HelixToolkit.UWP
             /// <summary>
             /// 
             /// </summary>
+            public static string VSSpline
+            {
+                get;
+            } = "vsSpline";
+            /// <summary>
+            /// 
+            /// </summary>
             public static string VSBillboard
             {
                 get;
@@ -519,6 +526,12 @@ namespace HelixToolkit.UWP
             public static readonly ShaderDescription VSPointShadow = new ShaderDescription(nameof(VSPointShadow), ShaderStage.Vertex,
                 new ShaderReflector(),
                 DefaultVSShaderByteCodes.VSPointShadow);
+            /// <summary>
+            /// 
+            /// </summary>
+            public static readonly ShaderDescription VSSpline = new ShaderDescription(nameof(VSSpline), ShaderStage.Vertex,
+                new ShaderReflector(),
+                DefaultVSShaderByteCodes.VSSpline);
             /// <summary>
             /// 
             /// </summary>

@@ -59,6 +59,13 @@ namespace HelixToolkit.UWP
             /// <summary>
             /// 
             /// </summary>
+            public static string GSSpline
+            {
+                get;
+            } = "gsSpline";
+            /// <summary>
+            /// 
+            /// </summary>
             public static string GSBillboard
             {
                 get;
@@ -114,6 +121,11 @@ namespace HelixToolkit.UWP
             /// </summary>
             public static readonly ShaderDescription GSLineArrowHeadTail = new ShaderDescription(nameof(GSLineArrowHeadTail), ShaderStage.Geometry, new ShaderReflector(),
                 DefaultGSShaderByteCodes.GSLineArrowHeadTail);
+            /// <summary>
+            /// 
+            /// </summary>
+            public static readonly ShaderDescription GSSpline = new ShaderDescription(nameof(GSSpline), ShaderStage.Geometry, new ShaderReflector(),
+                DefaultGSShaderByteCodes.GSSpline);
             /// <summary>
             /// 
             /// </summary>

@@ -132,7 +132,7 @@ cbuffer cbLights : register(b3)
     float padding;
 };
 
-#if defined(POINTLINE) // model for line, point and billboard
+#if defined(POINTLINE) // model for spline, line, point and billboard
 //Per model
 cbuffer cbPointLineModel : register(b4)
 {
@@ -140,14 +140,33 @@ cbuffer cbPointLineModel : register(b4)
     bool bHasInstances = false;
     bool bHasInstanceParams = false;
 	float2 padding1;
-    float4 pfParams = float4(0, 0, 0, 0); //Shared with line, points and billboard
-    float4 pColor = float4(1, 1, 1, 1); //Shared with line, points and billboard
+    float4 pfParams = float4(0, 0, 0, 0); //Shared with spline, line, points and billboard
+    float4 pColor = float4(1, 1, 1, 1); //Shared with spline, line, points and billboard
     bool fixedSize;
 	bool3 pbParams;
     bool enableDistanceFading;
     float fadeNearDistance;
     float fadeFarDistance;
     float padding2;
+};
+#endif
+#if defined(MATRIXSPLINE) // model for matrix spline
+//Per model
+cbuffer cbMatrixSplineModel : register(b4)
+{
+    float4x4 mWorld;
+    bool bHasInstances = false;
+    bool bHasInstanceParams = false;
+	float2 padding1;
+    float4 pfParams = float4(0, 0, 0, 0);
+    float4 pColor = float4(1, 1, 1, 1);
+    bool fixedSize;
+	bool3 pbParams;
+    bool enableDistanceFading;
+    float fadeNearDistance;
+    float fadeFarDistance;
+    float padding2;
+    float4x4 mSpline;
 };
 #endif
 #if defined(VOLUME) // model for line, point and billboard

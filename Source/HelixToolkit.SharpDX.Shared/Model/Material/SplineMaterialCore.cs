@@ -18,18 +18,18 @@ namespace HelixToolkit.UWP
     {
         public class SplineMaterialCore : LineMaterialCore
         {
-            private float tension = 0.5f;
+            private Matrix splineMatrix;
 
             /// <summary>
-            /// Gets or sets the tension of the spline.
+            /// Gets or sets the spline matrix.
             /// </summary>
             /// <value>
-            /// The tension of the spline.
+            /// The spline matrix.
             /// </value>
-            public float Tension
+            public Matrix SplineMatrix
             {
-                set { Set(ref this.tension, value); }
-                get { return this.tension; }
+                set { this.Set(ref this.splineMatrix, value); }
+                get { return this.splineMatrix; }
             }
 
             public override MaterialVariable CreateMaterialVariables(IEffectsManager manager, IRenderTechnique technique)

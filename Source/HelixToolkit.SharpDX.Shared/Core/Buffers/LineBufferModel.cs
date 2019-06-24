@@ -35,8 +35,9 @@ namespace HelixToolkit.UWP
             /// </summary>
             /// <param name="structSize">Size of the structure.</param>
             /// <param name="dynamic">Create dynamic buffer or immutable buffer</param>
-            public LineGeometryBufferModel(int structSize, bool dynamic = false)
-                : base(PrimitiveTopology.LineList,
+            /// <param name="topology">The topology.</param>
+            public LineGeometryBufferModel(int structSize, bool dynamic = false, PrimitiveTopology topology = PrimitiveTopology.LineList)
+                : base(topology,
                 dynamic ? new DynamicBufferProxy(structSize, BindFlags.VertexBuffer) : new ImmutableBufferProxy(structSize, BindFlags.VertexBuffer) as IElementsBufferProxy, 
                 dynamic ? new DynamicBufferProxy(sizeof(int), BindFlags.IndexBuffer) : new ImmutableBufferProxy(sizeof(int), BindFlags.IndexBuffer) as IElementsBufferProxy)
             {
@@ -47,8 +48,9 @@ namespace HelixToolkit.UWP
             /// </summary>
             /// <param name="vertexBuffer"></param>
             /// <param name="dynamic">Create dynamic buffer or immutable buffer</param> 
-            public LineGeometryBufferModel(IElementsBufferProxy vertexBuffer, bool dynamic = false)
-                : base(PrimitiveTopology.LineList,
+            /// <param name="topology">The topology.</param>
+            public LineGeometryBufferModel(IElementsBufferProxy vertexBuffer, bool dynamic = false, PrimitiveTopology topology = PrimitiveTopology.LineList)
+                : base(topology,
                 vertexBuffer,
                 dynamic ? new DynamicBufferProxy(sizeof(int), BindFlags.IndexBuffer) : new ImmutableBufferProxy(sizeof(int), BindFlags.IndexBuffer) as IElementsBufferProxy)
             {
@@ -59,29 +61,34 @@ namespace HelixToolkit.UWP
             /// </summary>
             /// <param name="vertexBuffer"></param>
             /// <param name="dynamic">Create dynamic buffer or immutable buffer</param> 
-            public LineGeometryBufferModel(IElementsBufferProxy[] vertexBuffer, bool dynamic = false) 
-                : base(PrimitiveTopology.LineList,
+            /// <param name="topology">The topology.</param>
+            public LineGeometryBufferModel(IElementsBufferProxy[] vertexBuffer, bool dynamic = false, PrimitiveTopology topology = PrimitiveTopology.LineList) 
+                : base(topology,
                 vertexBuffer,
                 dynamic ? new DynamicBufferProxy(sizeof(int), BindFlags.IndexBuffer) : new ImmutableBufferProxy(sizeof(int), BindFlags.IndexBuffer) as IElementsBufferProxy)
             {
             }
+
             /// <summary>
             /// Initializes a new instance of the <see cref="LineGeometryBufferModel{VertexStruct}"/> class.
             /// </summary>
             /// <param name="vertexBuffer"></param>
             /// <param name="indexBuffer"></param>
-            public LineGeometryBufferModel(IElementsBufferProxy vertexBuffer, IElementsBufferProxy indexBuffer)
-                : base(PrimitiveTopology.LineList,
+            /// <param name="topology">The topology.</param>
+            public LineGeometryBufferModel(IElementsBufferProxy vertexBuffer, IElementsBufferProxy indexBuffer, PrimitiveTopology topology = PrimitiveTopology.LineList)
+                : base(topology,
                 vertexBuffer, indexBuffer)
             {
             }
+
             /// <summary>
             /// Initializes a new instance of the <see cref="LineGeometryBufferModel{VertexStruct}"/> class.
             /// </summary>
             /// <param name="vertexBuffer"></param>
             /// <param name="indexBuffer"></param>
-            public LineGeometryBufferModel(IElementsBufferProxy[] vertexBuffer, IElementsBufferProxy indexBuffer) 
-                : base(PrimitiveTopology.LineList,
+            /// <param name="topology">The topology.</param>
+            public LineGeometryBufferModel(IElementsBufferProxy[] vertexBuffer, IElementsBufferProxy indexBuffer, PrimitiveTopology topology = PrimitiveTopology.LineList) 
+                : base(topology,
                 vertexBuffer, indexBuffer)
             {
             }
@@ -94,15 +101,19 @@ namespace HelixToolkit.UWP
         {
             [ThreadStatic]
             private static LinesVertex[] vertexArrayBuffer = null;
+
             /// <summary>
             /// Initializes a new instance of the <see cref="DefaultLineGeometryBufferModel"/> class.
             /// </summary>
             public DefaultLineGeometryBufferModel() : base(LinesVertex.SizeInBytes) { }
+
             /// <summary>
             /// Initializes a new instance of the <see cref="DefaultLineGeometryBufferModel"/> class.
             /// </summary>
             /// <param name="isDynamic"></param>
-            public DefaultLineGeometryBufferModel(bool isDynamic) : base(LinesVertex.SizeInBytes, isDynamic) { }
+            /// <param name="topology">The topology.</param>
+            public DefaultLineGeometryBufferModel(bool isDynamic, PrimitiveTopology topology = PrimitiveTopology.LineList) 
+                : base(LinesVertex.SizeInBytes, isDynamic, topology) { }
 
             /// <summary>
             /// Called when [create vertex buffer].
@@ -132,6 +143,7 @@ namespace HelixToolkit.UWP
             {
                 return base.IsVertexBufferChanged(propertyName, vertexBufferIndex) || propertyName.Equals(nameof(Geometry3D.Colors));
             }
+
             /// <summary>
             /// Called when [create index buffer].
             /// </summary>
@@ -150,6 +162,7 @@ namespace HelixToolkit.UWP
                     buffer.UploadDataToBuffer(context, emptyIndices, 0);
                 }
             }
+
             /// <summary>
             /// Called when [build vertex array].
             /// </summary>
@@ -183,7 +196,8 @@ namespace HelixToolkit.UWP
             /// <summary>
             /// Initializes a new instance of the <see cref="DynamicLineGeometryBufferModel"/> class.
             /// </summary>
-            public DynamicLineGeometryBufferModel() : base(true) { }
+            public DynamicLineGeometryBufferModel()
+                : base(true) { }
         }
     }
 

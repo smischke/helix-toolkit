@@ -96,6 +96,17 @@
                 Geometry="{Binding Lines}"
                 Material="{Binding LineMaterial}"
                 Transform="{Binding Model4Transform}" />
+            <hx:CatmullRomSplineGeometryModel3D
+                Smoothness="{Binding LineSmoothness}"
+                Thickness="{Binding LineThickness}"
+                Tension="{Binding SplineTension}"
+                Geometry="{Binding SplineModel}"
+                Color="White"/>
+            <hx:BezierSplineGeometryModel3D
+                Smoothness="{Binding LineSmoothness}"
+                Thickness="{Binding LineThickness}"
+                Geometry="{Binding BezierModel}"
+                Color="White"/>
         </hx:Viewport3DX>
         <StackPanel Grid.Row="1">
             <Expander
@@ -131,6 +142,13 @@
                         Minimum="0"
                         Value="{Binding LineSmoothness}" />
                     <CheckBox IsChecked="{Binding EnableArrowHeadTail}">Arrow Head and Tail</CheckBox>
+                    <TextBlock Margin="3">Spline Tension</TextBlock>
+                    <Slider
+                        Margin="3"
+                        Maximum="5"
+                        Minimum="0"
+                        TickFrequency="0.1"
+                        Value="{Binding SplineTension}" />
                 </StackPanel>
             </Expander>
         </StackPanel>

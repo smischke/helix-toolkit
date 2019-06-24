@@ -27,6 +27,7 @@ namespace HelixToolkit.UWP
             public ShaderPass LinePass { get; }
             public ShaderPass ShadowPass { get; }
             public ShaderPass DepthPass { get; }
+
             /// <summary>
             /// Initializes a new instance of the <see cref="LineMaterialVariable"/> class.
             /// </summary>
@@ -39,7 +40,26 @@ namespace HelixToolkit.UWP
             public LineMaterialVariable(IEffectsManager manager, IRenderTechnique technique, LineMaterialCore materialCore,
                 string linePassName = DefaultPassNames.Default, string shadowPassName = DefaultPassNames.ShadowPass,
                 string depthPassName = DefaultPassNames.DepthPrepass) 
-                : base(manager, technique, DefaultPointLineConstantBufferDesc, materialCore)
+                : this(manager, technique, DefaultPointLineConstantBufferDesc, materialCore, 
+                       linePassName, shadowPassName, depthPassName)
+            {
+            }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="LineMaterialVariable"/> class.
+            /// </summary>
+            /// <param name="manager">The manager.</param>
+            /// <param name="technique">The technique.</param>
+            /// <param name="materialCore">The material core.</param>
+            /// <param name="meshMaterialConstantBufferDesc">The Constant Buffer description</param>
+            /// <param name="linePassName">Name of the line pass.</param>
+            /// <param name="shadowPassName">Name of the shadow pass.</param>
+            /// <param name="depthPassName">Name of the depth pass</param>
+            public LineMaterialVariable(IEffectsManager manager, IRenderTechnique technique, 
+                ConstantBufferDescription meshMaterialConstantBufferDesc, LineMaterialCore materialCore, 
+                string linePassName = DefaultPassNames.Default, string shadowPassName = DefaultPassNames.ShadowPass, 
+                string depthPassName = DefaultPassNames.DepthPrepass) 
+                : base(manager, technique, meshMaterialConstantBufferDesc, materialCore)
             {
                 LinePass = technique[linePassName];
                 ShadowPass = technique[shadowPassName];

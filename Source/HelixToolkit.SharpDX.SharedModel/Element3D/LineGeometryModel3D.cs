@@ -2,7 +2,7 @@
 The MIT License (MIT)
 Copyright (c) 2018 Helix Toolkit contributors
 */
-using global::SharpDX;
+using SharpDX;
 #if NETFX_CORE
 using Windows.UI.Xaml;
 using Media = Windows.UI;
@@ -27,6 +27,8 @@ namespace HelixToolkit.Wpf.SharpDX
     /// <seealso cref="GeometryModel3D" />
     public class LineGeometryModel3D : GeometryModel3D
     {
+        private LineMaterialCore material => (LineMaterialCore)((LineNode)this.SceneNode).Material;
+
 #region Dependency Properties        
         /// <summary>
         /// The color property
@@ -126,23 +128,22 @@ namespace HelixToolkit.Wpf.SharpDX
         {
             set
             {
-                SetValue(FixedSizeProperty, value);
+                this.SetValue(FixedSizeProperty, value);
             }
             get
             {
-                return (bool)GetValue(FixedSizeProperty);
+                return (bool) this.GetValue(FixedSizeProperty);
             }
         }
 #endregion
 
-        protected readonly LineMaterialCore material = new LineMaterialCore();
         /// <summary>
         /// Called when [create scene node].
         /// </summary>
         /// <returns></returns>
         protected override SceneNode OnCreateSceneNode()
         {
-            return new LineNode() { Material = material };
+            return new LineNode { Material = new LineMaterialCore() };
         }
 
         /// <summary>
@@ -151,10 +152,11 @@ namespace HelixToolkit.Wpf.SharpDX
         /// <param name="core">The core.</param>
         protected override void AssignDefaultValuesToSceneNode(SceneNode core)
         {
-            material.LineColor = Color.ToColor4();
-            material.Thickness = (float)Thickness;
-            material.Smoothness = (float)Smoothness;
-            material.FixedSize = FixedSize;
+            var m = this.material;
+            m.LineColor = this.Color.ToColor4();
+            m.Thickness = (float)this.Thickness;
+            m.Smoothness = (float)this.Smoothness;
+            m.FixedSize = this.FixedSize;
             base.AssignDefaultValuesToSceneNode(core);
         }
     }

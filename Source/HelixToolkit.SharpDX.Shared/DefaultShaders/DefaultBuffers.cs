@@ -24,6 +24,7 @@ namespace HelixToolkit.UWP
             public const string ModelCB = "cbMesh";
             public const string SimpleMeshCB = "cbMeshSimple";
             public const string PointLineModelCB = "cbPointLineModel";
+            public const string MatrixSplineModelCB = "cbMatrixSplineModel";
             public const string ParticleModelCB = "cbParticleModel";
             public const string PlaneGridModelCB = "cbPlaneGridModel";
             public const string LightCB = "cbLights";

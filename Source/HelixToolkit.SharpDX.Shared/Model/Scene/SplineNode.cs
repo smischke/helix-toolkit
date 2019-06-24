@@ -25,11 +25,13 @@ namespace HelixToolkit.UWP
 
         public class SplineNode : LineNode
         {
+            /// <inheritdoc />
             protected override IRenderTechnique OnCreateRenderTechnique(IRenderHost host)
             {
                 return host.EffectsManager[DefaultRenderTechniqueNames.Splines];
             }
 
+            /// <inheritdoc />
             protected override IAttachableBufferModel OnCreateBufferModel(Guid modelGuid, Geometry3D geometry)
             {
                 return geometry != null && geometry.IsDynamic

@@ -63,6 +63,7 @@
     <None Remove="Resources\gsMeshSkinnedOut.cso" />
     <None Remove="Resources\gsParticle.cso" />
     <None Remove="Resources\gsPoint.cso" />
+    <None Remove="Resources\gsSpline.cso" />
     <None Remove="Resources\hsMeshTriTessellation.cso" />
     <None Remove="Resources\psBillboardText.cso" />
     <None Remove="Resources\psBillboardTextOIT.cso" />
@@ -156,6 +157,7 @@
     <EmbeddedResource Include="Resources\arial.dds" />
     <EmbeddedResource Include="Resources\gsLineArrowHead.cso" />
     <EmbeddedResource Include="Resources\gsLineArrowHeadTail.cso" />
+    <EmbeddedResource Include="Resources\gsSpline.cso" />
     <EmbeddedResource Include="Resources\psEffectOutlineSmooth.cso" />
     <EmbeddedResource Include="Resources\psMeshPBROIT.cso" />
   </ItemGroup>
